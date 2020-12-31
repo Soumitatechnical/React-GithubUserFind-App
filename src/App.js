@@ -1,25 +1,67 @@
-import logo from './logo.svg';
-import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+import axios from 'axios';
+import React, {Component} from 'react';
+import './App.css'
+import Form from './components/Form';
 
-export default App;
+import Navbar from './components/Navbar';
+import Users from './components/Users';
+
+
+
+  class App extends Component {
+
+    state={
+      users:[],
+      loading:''
+    };
+  
+    handleGetRequest = (e) =>{
+      
+      e.preventDefault();
+        const searchTerm=e.target.elements.find.value;
+        this.setState({loading:"loading...."});
+
+        if(searchTerm){
+          
+            axios.get(`https://api.github.com/search/users?q=${searchTerm}&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`)
+
+            .then((res)=>{
+              this.setState({users: res.data.items})
+            })
+            .catch((err)=>{
+              console.log(err);
+            });
+
+      }else{
+        alert("Please Enter a name");
+      }
+  
+    }
+
+     clearSearch=(e)=>{
+      
+      this.setState({users:[]});
+   }
+  
+    render() {
+      return (
+        <div className="app">
+          <nav className="navbar bg-primary">
+            <Navbar />
+          </nav>
+            <Form 
+              handleGetRequest={this.handleGetRequest} 
+              clear={this.clearSearch}
+              clearBtnControl={this.state.users.length > 0 ? true :false}
+            /> 
+            <Users users={this.state.users} />   
+        </div>
+      )
+    }
+  }
+
+ 
+  
+
+export default App
